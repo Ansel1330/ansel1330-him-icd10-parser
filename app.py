@@ -3,57 +3,101 @@ import pandas as pd
 import numpy as np
 import os
 
-# --- PAGE CONFIGURATION ---
+# --- 1. CONFIGURATION & COMPACT MULTI-MODE STYLING ---
 st.set_page_config(page_title="UCC HIM Level 200 Hub", page_icon="🎓", layout="wide")
 
-# --- CUSTOM CSS FOR COMPACT UI & DESIGN ---
-st.markdown("""
+# Navigation & Theme Control in Sidebar
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Sidebar layout elements
+if os.path.exists("OIP.webp"):
+    st.sidebar.image("OIP.webp", use_container_width=True)
+else:
+    st.sidebar.markdown("<h2 style='color:#FF4B4B; font-weight:700; margin:0;'>🏥 HIMSA UCC</h2>", unsafe_allow_html=True)
+
+st.sidebar.markdown("<h2 style='font-size:22px; font-weight:600; margin-top:5px;'>UCC HIM Portal</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("<p style='color:#64748B; font-size:14px; margin-top:-15px;'>Level 200 - Semester 2</p>", unsafe_allow_html=True)
+st.sidebar.markdown("---")
+
+# Navigation controls
+app_mode = st.sidebar.radio(
+    " Reisve Domain Controls",
+    ["📚 Course Material Distribution", "📝 Adaptive Quiz Arena", "🏆 Student Leaderboard Pool"]
+)
+
+st.sidebar.markdown("---")
+st.session_state.dark_mode = st.sidebar.toggle("🌙 Enable Dark Mode Layout")
+
+# Inject Custom Inter Typography & UI Theme Matrices dynamically
+if st.session_state.dark_mode:
+    bg_color, text_color, card_bg, border_color = "#0F172A", "#F8FAFC", "#1E293B", "#334155"
+else:
+    bg_color, text_color, card_bg, border_color = "#FFFFFF", "#0F172A", "#F8FAFC", "#E2E8F0"
+
+st.markdown(f"""
     <style>
-    .main-header { font-size: 26px; font-weight: bold; color: #FF4B4B; margin-bottom: 5px; }
-    .sub-header { font-size: 16px; color: #555555; margin-bottom: 20px; }
-    .course-card { padding: 15px; border-radius: 8px; border-left: 5px solid #0066cc; margin-bottom: 15px; background-color: rgba(0,102,204,0.05); }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    html, body, [class*="st-"] {{
+        font-family: 'Inter', sans-serif !important;
+    }}
+    .stApp {{
+        background-color: {bg_color};
+        color: {text_color};
+    }}
+    .main-title {{ 
+        font-size: 34px; 
+        font-weight: 700; 
+        color: #FF4B4B; 
+        letter-spacing: -0.5px;
+        margin-bottom: 5px;
+    }}
+    .section-subtitle {{
+        font-size: 16px;
+        color: #64748B;
+        margin-bottom: 25px;
+    }}
+    .course-card {{ 
+        padding: 20px; 
+        border-radius: 12px; 
+        border-left: 6px solid #FF4B4B; 
+        margin-bottom: 20px; 
+        background-color: {card_bg};
+        border-top: 1px solid {border_color};
+        border-right: 1px solid {border_color};
+        border-bottom: 1px solid {border_color};
+    }}
+    .pool-banner {{
+        background: linear-gradient(135deg, #FF4B4B 0%, #991B1B 100%);
+        color: white !important;
+        padding: 25px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+    }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- TRACKING CODES & PERSISTENT SESSION STATE ---
+
+# --- 2. PERSISTENT CORE SESSIONS ---
 if "quiz_level" not in st.session_state:
     st.session_state.quiz_level = "Medium"
 if "quiz_score" not in st.session_state:
     st.session_state.quiz_score = 0
 if "current_course_quiz" not in st.session_state:
     st.session_state.current_course_quiz = "HIM 212: Programming II"
-if "leaderboard_data" not in st.session_state:
-    # Cohort competition seed tracking
-    st.session_state.leaderboard_data = pd.DataFrame([
-        {"Student Name": "Kuami Majesty", "Score (pts)": 140, "Level Completed": "Intermediate"},
-        {"Student Name": "Mohammed Issifu", "Score (pts)": 190, "Level Completed": "Super Difficult"},
-        {"Student Name": "Abigail Mensah", "Score (pts)": 110, "Level Completed": "Medium"},
-        {"Student Name": "Emmanuel Tetteh", "Score (pts)": 80, "Level Completed": "Medium"},
-        {"Student Name": "Priscilla Osei", "Score (pts)": 150, "Level Completed": "Intermediate"}
-    ]).sort_values(by="Score (pts)", ascending=False).reset_index(drop=True)
+if "active_student" not in st.session_state:
+    st.session_state.active_student = None
 
-# --- SIDEBAR PORTAL & NAVIGATION ---
-# Fixed the TypeError here by removing the unsupported errors parameter
-if os.path.exists("OIP.webp"):
-    st.sidebar.image("OIP.webp", use_container_width=True)
-else:
-    st.sidebar.title("🏥 HIMSA UCC")
+# Pure Dynamic Database representation tracker (No fake filling)
+if "competition_pool" not in st.session_state:
+    st.session_state.competition_pool = {}
 
-st.sidebar.title("UCC HIM Portal")
-st.sidebar.markdown("### Level 200 - Semester 2")
 
-# Main Hub Controller Switching
-app_mode = st.sidebar.radio(
-    "🧭 Navigation Hub",
-    ["📚 Course Material Distribution", "📝 Adaptive Quiz Arena", "🏆 Student Leaderboard Pool"]
-)
-st.sidebar.markdown("---")
-st.sidebar.info("Department of Health Information Management\nSchool of Allied Health Sciences - UCC")
-
-# --- HUB MODULE 1: COURSE MATERIAL DISTRIBUTION ---
+# --- 3. HUB MODULE 1: COURSE MATERIAL DISTRIBUTION ---
 if app_mode == "📚 Course Material Distribution":
-    st.title("📚 Level 200 Second Semester Courseware Repository")
-    st.write("Access reference guides, schemas, outlines, and lecture files across all active domains.")
+    st.markdown("<h1 class='main-title'>📚 Courseware Repository</h1>", unsafe_allow_html=True)
+    st.markdown("<p class='section-subtitle'>Access core reference sheets, lecture slide decks, and module mappings.</p>", unsafe_allow_html=True)
     st.write("---")
     
     course_selection = st.selectbox(
@@ -69,7 +113,7 @@ if app_mode == "📚 Course Material Distribution":
         ]
     )
     
-    st.markdown(f"<div class='course-card'><h3>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='course-card'><h3 style='margin:0; font-weight:600;'>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
     
     # 1. HIM 212: PROGRAMMING II
     if "HIM 212" in course_selection:
@@ -81,7 +125,7 @@ if app_mode == "📚 Course Material Distribution":
             "Python GUI Programming_P2_JUNE2025 (2).pptx"
         ]
         for f in files:
-            st.code(f"📁 Local Source: Downloads/.../{f}")
+            st.code(f"📁 Path: Downloads/.../{f}")
             if not os.path.exists(f): 
                 with open(f, "w") as stub: stub.write("HIM 212 Lecture Content Stub.")
             with open(f, "rb") as b_file:
@@ -97,7 +141,7 @@ if app_mode == "📚 Course Material Distribution":
             "Introduction to Pathophysiology I.ppt"
         ]
         for f in files:
-            st.code(f"📁 Local Source: Downloads/.../{f}")
+            st.code(f"📁 Path: Downloads/.../{f}")
             if not os.path.exists(f): 
                 with open(f, "w") as stub: stub.write("HIM 208 Lecture Content Stub.")
             with open(f, "rb") as b_file:
@@ -117,16 +161,16 @@ if app_mode == "📚 Course Material Distribution":
             "HIM 204 LECTURE 8 - TUTORIAL SESSION.pdf"
         ]
         for f in files:
-            st.code(f"📁 Local Source: Downloads/.../{f}")
+            st.code(f"📁 Path: Downloads/.../{f}")
             if not os.path.exists(f): 
                 with open(f, "w") as stub: stub.write("HIM 204 Lecture Content Stub.")
             with open(f, "rb") as b_file:
                 st.download_button(label=f"📥 Download {f}", data=b_file, file_name=f, key=f)
 
-    # 4. HIM 210: DISEASE CLASSIFICATION AND CODING (PARSER INTEGRATION)
+    # 4. HIM 210: DISEASE CLASSIFICATION AND CODING (ICD-10 UTILITY ENGINE)
     elif "HIM 210" in course_selection:
         st.write("### ⚡ Integrated Functional Asset")
-        st.info("💡 **HIM 210 Tool:** Below is your active ICD-10 Diagnostic Parser Engine embedded within its exact course module mapping!")
+        st.info("💡 Below is your active ICD-10 Diagnostic Parser Engine embedded within its exact course module mapping!")
         st.markdown("---")
         
         search_query = st.text_input("🔍 ICD-10 Alpha-Index & Tabular Match Engine (Type Search Term):")
@@ -138,90 +182,147 @@ if app_mode == "📚 Course Material Distribution":
             ])
             st.dataframe(mock_hits, use_container_width=True)
 
-    # 5. OTHER COURSES
     else:
         st.write("#### Course Materials")
-        st.warning("🔄 System setup complete. Drop your files for this course into your GitHub folder to activate active client downloads!")
+        st.warning("🔄 System setup complete. Drop your remaining folder assets into the repository to activate download buttons!")
 
-# --- HUB MODULE 2: ADAPTIVE QUIZ ARENA ---
+
+# --- 4. HUB MODULE 2: ADAPTIVE QUIZ ARENA ---
 elif app_mode == "📝 Adaptive Quiz Arena":
-    st.title("📝 Multi-Level Adaptive Revision Arena")
-    st.write("Answer questions correctly to step up the difficulty from **Medium ➡️ Intermediate ➡️ Super Difficult**.")
+    st.markdown("<h1 class='main-title'>📝 Multi-Level Adaptive Revision Arena</h1>", unsafe_allow_html=True)
+    st.markdown("<p class='section-subtitle'>Answer questions correctly to step up the difficulty from Medium ➡️ Intermediate ➡️ Super Difficult.</p>", unsafe_allow_html=True)
     st.write("---")
     
-    st.session_state.current_course_quiz = st.selectbox(
-        "🎯 Select Topic Base to Test",
-        ["HIM 212: Programming II", "HIM 208: Pathophysiology II", "HIM 204: Database Structures", "PHL 205: Critical Thinking"]
-    )
-    
-    levels = ["Medium", "Intermediate", "Super Difficult"]
-    current_lvl = st.session_state.quiz_level
-    st.progress((levels.index(current_lvl) + 1) / len(levels))
-    st.markdown(f"#### Active Tier Status: :orange[{current_lvl}] | Total Accumulated Points: `{st.session_state.quiz_score}`")
+    # Session user checking verification
+    if st.session_state.active_student is None:
+        st.warning("⚠️ Access Denied: You must register your identity profile inside the 'Student Leaderboard Pool' tab first to participate and log points!")
+    else:
+        st.info(f"👤 Logged In As: **{st.session_state.active_student}** | Tier Points: `{st.session_state.quiz_score}`")
+        
+        st.session_state.current_course_quiz = st.selectbox(
+            "🎯 Select Topic Base to Test",
+            ["HIM 212: Programming II", "HIM 208: Pathophysiology II", "HIM 204: Database Structures", "PHL 205: Critical Thinking"]
+        )
+        
+        levels = ["Medium", "Intermediate", "Super Difficult"]
+        current_lvl = st.session_state.quiz_level
+        st.progress((levels.index(current_lvl) + 1) / len(levels))
+        st.markdown(f"#### Active Question Tier: :orange[{current_lvl}]")
 
-    # Core Course Comprehensive Question Bank Matrix
-    quiz_matrix = {
-        "HIM 212: Programming II": {
-            "Medium": {"q": "In Python, which keyword defines a reusable code block function?", "o": ["func", "def", "lambda"], "c": "def"},
-            "Intermediate": {"q": "Which Tkinter geometric positioning tool organizes components into rows and columns?", "o": ["pack()", "place()", "grid()"], "c": "grid()"},
-            "Super Difficult": {"q": "What mechanism avoids data corruption by locking read/write tasks inside multi-user SQLite connections?", "o": ["Transaction WAL isolation", "Recursive callbacks", "Widget binding callbacks"], "c": "Transaction WAL isolation"}
-        },
-        "HIM 208: Pathophysiology II": {
-            "Medium": {"q": "What core characteristic distinguishes Gram-positive cell structures?", "o": ["Thin lipids", "Thick peptidoglycan layer retaining stain", "Outer lipopolysaccharide coat"], "c": "Thick peptidoglycan layer retaining stain"},
-            "Intermediate": {"q": "Which transfer pattern relies on a virus vector injecting foreign genetic sequences into targeted host bacteria?", "o": ["Transduction", "Conjugation via sex pilus", "Transformation"], "c": "Transduction"},
-            "Super Difficult": {"q": "Which specialized chemical component works straight on preoptic hypothalamus maps to spike core set-points?", "o": ["Interleukin-1", "Prostaglandin E2 (PGE2)", "Tumor Necrosis Factor"], "c": "Prostaglandin E2 (PGE2)"}
-        },
-        "HIM 204: Database Structures": {
-            "Medium": {"q": "What structural key uniquely identifies a record row inside an index matrix?", "o": ["Foreign key", "Primary key", "Composite node"], "c": "Primary key"},
-            "Intermediate": {"q": "Which Normal Form demands the exclusion of all transitive functional dependencies?", "o": ["1NF", "2NF", "3NF"], "c": "3NF"},
-            "Super Difficult": {"q": "Which design concept describes an atomic, logical execution block that fully commits or entirely rolls back to preserve stability?", "o": ["Entity Relation Cardinality", "ACID Transaction", "Multi-valued dependency splitting"], "c": "ACID Transaction"}
-        },
-        "PHL 205: Critical Thinking": {
-            "Medium": {"q": "Which error type describes an attack targeted straight at an opponent's character rather than structural arguments?", "o": ["Ad Hominem", "Straw Man Fallacy", "Slippery Slope"], "c": "Ad Hominem"},
-            "Intermediate": {"q": "What type of reasoning draws logically certain conclusions from general premises?", "o": ["Deductive reasoning", "Inductive inference", "Abductive assumption"], "c": "Deductive reasoning"},
-            "Super Difficult": {"q": "Which condition is met when a premise's truth absolute forces a true conclusion, yet its premises remain false?", "o": ["Soundness criteria met", "Valid structure only", "Cognitive structural fallacy"], "c": "Valid structure only"}
+        # Question Bank Matrices
+        quiz_matrix = {
+            "HIM 212: Programming II": {
+                "Medium": {"q": "In Python, which keyword defines a reusable code block function?", "o": ["func", "def", "lambda"], "c": "def"},
+                "Intermediate": {"q": "Which Tkinter geometric positioning tool organizes components into rows and columns?", "o": ["pack()", "place()", "grid()"], "c": "grid()"},
+                "Super Difficult": {"q": "What mechanism avoids data corruption by locking read/write tasks inside multi-user SQLite connections?", "o": ["Transaction WAL isolation", "Recursive callbacks", "Widget binding callbacks"], "c": "Transaction WAL isolation"}
+            },
+            "HIM 208: Pathophysiology II": {
+                "Medium": {"q": "What core characteristic distinguishes Gram-positive cell structures?", "o": ["Thin lipids", "Thick peptidoglycan layer retaining stain", "Outer lipopolysaccharide coat"], "c": "Thick peptidoglycan layer retaining stain"},
+                "Intermediate": {"q": "Which transfer pattern relies on a virus vector injecting foreign genetic sequences into targeted host bacteria?", "o": ["Transduction", "Conjugation via sex pilus", "Transformation"], "c": "Transduction"},
+                "Super Difficult": {"q": "Which specialized chemical component works straight on preoptic hypothalamus maps to spike core set-points?", "o": ["Interleukin-1", "Prostaglandin E2 (PGE2)", "Tumor Necrosis Factor"], "c": "Prostaglandin E2 (PGE2)"}
+            },
+            "HIM 204: Database Structures": {
+                "Medium": {"q": "What structural key uniquely identifies a record row inside an index matrix?", "o": ["Foreign key", "Primary key", "Composite node"], "c": "Primary key"},
+                "Intermediate": {"q": "Which Normal Form demands the exclusion of all transitive functional dependencies?", "o": ["1NF", "2NF", "3NF"], "c": "3NF"},
+                "Super Difficult": {"q": "Which design concept describes an atomic, logical execution block that fully commits or entirely rolls back to preserve stability?", "o": ["Entity Relation Cardinality", "ACID Transaction", "Multi-valued dependency splitting"], "c": "ACID Transaction"}
+            },
+            "PHL 205: Critical Thinking": {
+                "Medium": {"q": "Which error type describes an attack targeted straight at an opponent's character rather than structural arguments?", "o": ["Ad Hominem", "Straw Man Fallacy", "Slippery Slope"], "c": "Ad Hominem"},
+                "Intermediate": {"q": "What type of reasoning draws logically certain conclusions from general premises?", "o": ["Deductive reasoning", "Inductive inference", "Abductive assumption"], "c": "Deductive reasoning"},
+                "Super Difficult": {"q": "Which condition is met when a premise's truth absolute forces a true conclusion, yet its premises remain false?", "o": ["Soundness criteria met", "Valid structure only", "Cognitive structural fallacy"], "c": "Valid structure only"}
+            }
         }
-    }
 
-    q_package = quiz_matrix[st.session_state.current_course_quiz][current_lvl]
-    user_choice = st.radio(f"❓ Question: {q_package['q']}", q_package['o'])
-    
-    if st.button("🚀 Process Choice & Update"):
-        if user_choice == q_package['c']:
-            st.success("🎯 Masterful! That choice is absolutely correct.")
-            st.session_state.quiz_score += 50
-            
-            if current_lvl == "Medium":
-                st.session_state.quiz_level = "Intermediate"
-            elif current_lvl == "Intermediate":
-                st.session_state.quiz_level = "Super Difficult"
-            elif current_lvl == "Super Difficult":
-                st.balloons()
-                st.success("🏆 Incredible! You have fully maxed out this course branch with a perfect track!")
+        q_package = quiz_matrix[st.session_state.current_course_quiz][current_lvl]
+        user_choice = st.radio(f"❓ Question: {q_package['q']}", q_package['o'])
+        
+        if st.button("🚀 Process Choice & Update"):
+            if user_choice == q_package['c']:
+                st.success("🎯 Masterful! That choice is absolutely correct.")
+                st.session_state.quiz_score += 50
+                
+                # Save dynamic track back to central leaderboard dictionary state map instantly
+                st.session_state.competition_pool[st.session_state.active_student] = {
+                    "Score (pts)": st.session_state.quiz_score,
+                    "Highest Tier": current_lvl
+                }
+                
+                if current_lvl == "Medium":
+                    st.session_state.quiz_level = "Intermediate"
+                elif current_lvl == "Intermediate":
+                    st.session_state.quiz_level = "Super Difficult"
+                elif current_lvl == "Super Difficult":
+                    st.balloons()
+                    st.success("🏆 Incredible! You have completely conquered this course challenge tier layout!")
+                st.rerun()
+            else:
+                st.error("❌ Incorrect choice path! Review your downloaded material cache and try again.")
+
+        if st.button("🔄 Reset Personal Arena Run"):
+            st.session_state.quiz_level = "Medium"
+            st.session_state.quiz_score = 0
+            if st.session_state.active_student in st.session_state.competition_pool:
+                st.session_state.competition_pool[st.session_state.active_student] = {"Score (pts)": 0, "Highest Tier": "Medium"}
             st.rerun()
-        else:
-            st.error("❌ Incorrect path choice. Re-read your assigned materials repository list and test again!")
 
-    if st.button("🔄 Restart Trial Matrix"):
-        st.session_state.quiz_level = "Medium"
-        st.session_state.quiz_score = 0
-        st.rerun()
 
-# --- HUB MODULE 3: LEADERBOARD RANKING POOL ---
+# --- 5. HUB MODULE 3: LEADERBOARD RANKING POOL ---
 elif app_mode == "🏆 Student Leaderboard Pool":
-    st.title("🏆 UCC Level 200 Cohort Leaderboard Pool")
-    st.write("Real-time tracked competitive points metric displaying performance across all topics.")
+    st.markdown("<h1 class='main-title'>🏆 Live Roster Competition Pool</h1>", unsafe_allow_html=True)
+    st.markdown("<p class='section-subtitle'>Real-time ranking of real students who log onto the hub and decide to participate.</p>", unsafe_allow_html=True)
     st.write("---")
     
-    col1, col2 = st.columns([2, 1])
+    # PROFILE ENTRY PANEL
+    st.markdown("""
+        <div class='pool-banner'>
+            <h3 style='margin:0 0 5px 0; font-weight:600; color:white;'>📝 Active Profile Entrance</h3>
+            <p style='margin:0; opacity:0.9; font-size:14px;'>Enter your real name or unique campus alias to open an active tracking scorecard stream!</p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    with col1:
-        st.subheader("Leaderboard Ranking Table")
-        st.dataframe(st.session_state.leaderboard_data, use_container_width=True)
+    join_col1, join_col2 = st.columns([3, 1])
+    with join_col1:
+        chosen_name = st.text_input("👤 Enter Full Student Name or Custom Alias Token:", placeholder="e.g. Mohammed Issifu")
+    with join_col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("⚡ Establish Pool Account", use_container_width=True):
+            if chosen_name.strip() != "":
+                clean_name = chosen_name.strip()
+                st.session_state.active_student = clean_name
+                if clean_name not in st.session_state.competition_pool:
+                    st.session_state.competition_pool[clean_name] = {"Score (pts)": 0, "Highest Tier": "Medium"}
+                st.success(f"🎉 Active session profile locked to: **{clean_name}**. Navigate to the Quiz tab to compete!")
+                st.rerun()
+            else:
+                st.error("❌ Identification error: Input field blank!")
+                
+    st.write("---")
+    
+    # DYNAMIC CHART AND LEADERBOARD GENERATION POOL
+    if len(st.session_state.competition_pool) == 0:
+        st.info("📊 The competition pool is currently empty. Be the first to type in your name above, hop into the Quiz Arena, and log points!")
+    else:
+        # Convert dictionary values to structured Dataframes
+        pool_records = []
+        for name, data in st.session_state.competition_pool.items():
+            pool_records.append({
+                "Student Name": name,
+                "Score (pts)": data["Score (pts)"],
+                "Highest Tier": data["Highest Tier"]
+            })
+            
+        df_pool = pd.DataFrame(pool_records)
+        df_pool = df_pool.sort_values(by="Score (pts)", ascending=False).reset_index(drop=True)
+        df_pool.index += 1  # Standard Rank Index representation mapping
         
-    with col2:
-        st.subheader("Performance Spread Chart")
-        st.bar_chart(data=st.session_state.leaderboard_data, x="Student Name", y="Score (pts)", color="#FF4B4B")
+        col_board, col_chart = st.columns([1, 1])
         
-    st.markdown("---")
-    st.caption("💡 Scores are calculated using correct adaptive step advancements (+50 per breakthrough).")
+        with col_board:
+            st.markdown("### 📊 Active Standing Board")
+            st.dataframe(df_pool, use_container_width=True)
+            
+        with col_chart:
+            st.markdown("### 📈 Class Ranking Visual Spread")
+            st.bar_chart(data=df_pool, x="Student Name", y="Score (pts)", color="#FF4B4B")
+            
+        st.sidebar.info(f"🔥 Active Competitors in Pool: {len(pool_records)}")
