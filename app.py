@@ -370,168 +370,56 @@ if app_mode == "📚 Course Material Distribution":
 # ============================================================
 # MODULE 2: AI-POWERED ADAPTIVE QUIZ ARENA
 # ============================================================
-elif app_mode == "📝 Adaptive Quiz Arena":
-    st.markdown("<h1 class='main-title'>📝 AI-Powered Adaptive Quiz Arena</h1>", unsafe_allow_html=True)
-    st.markdown("<div class='ai-badge'>✨ Powered by Claude AI — Real Exam Questions, All 7 Courses</div>", unsafe_allow_html=True)
-    st.markdown("<p class='section-subtitle'>Answer questions correctly to step up the difficulty: Medium ➡️ Intermediate ➡️ Super Difficult.</p>", unsafe_allow_html=True)
-    st.write("---")
+elif app_mode == "Quiz Arena":
+    st.markdown("<h1 class='main-title'>📚 Course Quiz Arena</h1>", unsafe_allow_html=True)
+    
+    # 1. Course Selection
+    course_list = [
+        "HIM 212: Programming and Software Development II",
+        "HIM 208: Pathophysiology II",
+        "HIM 204: Database Structures",
+        "HIM 210: Disease Classification and Coding",
+        "PHL 205: Critical Thinking and Practical Reasoning",
+        "HIM 202: System Analysis and Design",
+        "HIM 206: Data Communication and Networks in Healthcare"
+    ]
+    selected_course = st.selectbox("Select Course:", course_list)
 
-    if st.session_state.active_student is None:
-        st.warning("⚠️ Access Denied: You must register your name profile inside the 'Student Leaderboard Pool' tab first to join and compete live!")
-    else:
-        st.info(f"👤 Active Competitor: **{st.session_state.active_student}** | Points Accumulated: `{st.session_state.score}`")
+    if st.button("Generate Quiz"):
+        # This calls our question bank function
+        st.session_state.quiz_data = generate_ai_questions(selected_course)
+        st.session_state.quiz_index = 0
+        st.rerun()
 
-        selected_course = st.selectbox("🎯 Select Course to Be Tested On:", ALL_COURSES)
-
-        # Reset AI questions when course changes
-        if selected_course != st.session_state.current_topic:
-            st.session_state.ai_questions = []
-            st.session_state.quiz_index = 0
-            st.session_state.current_topic = selected_course
-            st.session_state.answered = False
-            st.session_state.last_correct = None
-            st.session_state.explanation = ""
-
-        # Difficulty tier tracker
-        levels = ["Medium", "Intermediate", "Super Difficult"]
-        current_lvl = st.session_state.quiz_level
-        st.progress((levels.index(current_lvl) + 1) / len(levels))
-        st.markdown(f"#### Active Difficulty Tier: :orange[{current_lvl}]")
-        st.write("---")
-
-        # Number of questions slider
-        num_q = st.slider("How many AI questions to generate?", min_value=5, max_value=20, value=10, step=5)
-
-        # Generate button
-        gen_label = "🔁 Regenerate New Questions" if st.session_state.ai_questions else "🤖 Generate AI Questions"
-        col_gen, _ = st.columns([2, 3])
-        with col_gen:
-            if st.button(gen_label, use_container_width=True):
-                with st.spinner(f"🧠 Claude AI is crafting {num_q} real {current_lvl}-level questions for {selected_course}..."):
-                    try:
-                        st.session_state.ai_questions = generate_ai_questions(selected_course, num_q)
-                        st.session_state.quiz_index = 0
-                        st.session_state.answered = False
-                        st.session_state.last_correct = None
-                        st.session_state.explanation = ""
-                        st.success(f"✅ {len(st.session_state.ai_questions)} questions ready for **{selected_course}** — [{current_lvl}] tier!")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"❌ Question generation failed: {e}")
-
-        # Reset arena button
-        if st.button("🔄 Reset Personal Arena Run"):
-            st.session_state.quiz_level = "Medium"
-            st.session_state.score = 0
-            st.session_state.ai_questions = []
-            st.session_state.quiz_index = 0
-            st.session_state.answered = False
-            st.session_state.last_correct = None
-            st.session_state.explanation = ""
-            if st.session_state.active_student in st.session_state.competition_pool:
-                st.session_state.competition_pool[st.session_state.active_student] = {
-                    "Score (pts)": 0, "Highest Tier": "Medium"
-                }
-            st.rerun()
-
-        st.write("---")
-
-        # --- QUIZ DISPLAY ---
-        if not st.session_state.ai_questions:
-            st.markdown(f"""
-                <div style='text-align:center; padding:40px; opacity:0.65;'>
-                    <h3 style='color:{text_color};'>🤖 No questions loaded yet</h3>
-                    <p style='color:{sub_text};'>Select a course above and click <strong>"Generate AI Questions"</strong>
-                    to create a fresh set of real exam questions.</p>
-                </div>
-            """, unsafe_allow_html=True)
-        else:
-            questions = st.session_state.ai_questions
-            total_q   = len(questions)
-            idx       = st.session_state.quiz_index
-
-            if idx >= total_q:
-                st.success(f"🏆 You've completed all {total_q} questions for **{selected_course}**! Score: **{st.session_state.score} pts**")
-
-                # Advance difficulty tier automatically
-                if current_lvl == "Medium":
-                    st.session_state.quiz_level = "Intermediate"
-                    st.info("🎯 Tier unlocked: **Intermediate**! Generate new questions to continue climbing.")
-                elif current_lvl == "Intermediate":
-                    st.session_state.quiz_level = "Super Difficult"
-                    st.info("🔥 Tier unlocked: **Super Difficult**! Generate new questions for the final challenge.")
-                elif current_lvl == "Super Difficult":
-                    st.balloons()
-                    st.success("🏆 Incredible! You have completely conquered all difficulty tiers for this course!")
-
-                if st.session_state.active_student in st.session_state.competition_pool:
-                    st.session_state.competition_pool[st.session_state.active_student] = {
-                        "Score (pts)": st.session_state.score,
-                        "Highest Tier": current_lvl
-                    }
-
-                if st.button("🔄 Generate Fresh Questions for Next Tier"):
-                    st.session_state.ai_questions = []
-                    st.session_state.quiz_index = 0
-                    st.session_state.answered = False
-                    st.session_state.last_correct = None
-                    st.session_state.explanation = ""
-                    st.rerun()
-
+    # 2. Display Quiz
+    if "quiz_data" in st.session_state and st.session_state.quiz_data:
+        q_data = st.session_state.quiz_data[st.session_state.quiz_index]
+        st.write(f"### Question {st.session_state.quiz_index + 1} of {len(st.session_state.quiz_data)}")
+        st.info(q_data['q'])
+        
+        choice = st.radio("Choose:", q_data['o'], key="q_radio")
+        
+        if st.button("Submit"):
+            if choice == q_data['c']:
+                st.success(f"Correct! {q_data['explanation']}")
             else:
-                q_data = questions[idx]
+                st.error(f"Incorrect. Correct answer: {q_data['c']}")
+            
+            if st.button("Next Question"):
+                st.session_state.quiz_index += 1
+                st.rerun()
 
-                # Progress bar
-                st.markdown(f"### Question {idx + 1} of {total_q}")
-                st.progress((idx + 1) / total_q)
-
-                # Question card
-                st.markdown(f"""
-                    <div class='course-card'>
-                        <p style='font-size:17px; font-weight:500; color:{text_color}; margin:0;'>{q_data['q']}</p>
-                    </div>
-                """, unsafe_allow_html=True)
-
-                if not st.session_state.answered:
-                    u_choice = st.radio("Select your answer:", q_data['o'], label_visibility="collapsed")
-
-                    if st.button("🚀 Submit Answer"):
-                        correct = (u_choice == q_data['c'])
-                        st.session_state.last_correct = correct
-                        st.session_state.explanation  = q_data.get("explanation", "")
-
-                        if correct:
-                            st.session_state.score += 50
-                            if st.session_state.active_student in st.session_state.competition_pool:
-                                st.session_state.competition_pool[st.session_state.active_student] = {
-                                    "Score (pts)": st.session_state.score,
-                                    "Highest Tier": current_lvl
-                                }
-
-                        st.session_state.answered = True
-                        st.rerun()
-
-                else:
-                    # Result + Explanation
-                    if st.session_state.last_correct:
-                        st.success("🎯 Masterful! That choice is absolutely correct.")
-                    else:
-                        st.error(f"❌ Incorrect! The correct answer was: **{q_data['c']}**")
-
-                    if st.session_state.explanation:
-                        st.markdown(f"""
-                            <div class='explanation-box'>
-                                <strong style='color:#93C5FD;'>📖 Explanation:</strong>
-                                <p style='color:#E2E8F0; margin:6px 0 0 0;'>{st.session_state.explanation}</p>
-                            </div>
-                        """, unsafe_allow_html=True)
-
-                    if st.button("➡️ Next Question"):
-                        st.session_state.quiz_index  += 1
-                        st.session_state.answered     = False
-                        st.session_state.last_correct = None
-                        st.session_state.explanation  = ""
-                        st.rerun()
+    # 3. PDF Download Section
+    st.write("---")
+    if "quiz_data" in st.session_state and st.session_state.quiz_data:
+        # Note: Ensure the function 'generate_pdf_download' is defined in your code
+        pdf_bytes = generate_pdf_download(selected_course, st.session_state.quiz_data)
+        st.download_button(
+            label="📥 Download Quiz as PDF", 
+            data=pdf_bytes, 
+            file_name="Quiz.pdf", 
+            mime="application/pdf"
+        )
 
 
 # ============================================================
