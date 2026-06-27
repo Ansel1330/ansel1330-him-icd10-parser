@@ -33,7 +33,12 @@ if "leaderboard_data" not in st.session_state:
     ]).sort_values(by="Score (pts)", ascending=False).reset_index(drop=True)
 
 # --- SIDEBAR PORTAL & NAVIGATION ---
-st.sidebar.image("OIP.webp", use_container_width=True, errors="ignore")
+# Fixed the TypeError here by removing the unsupported errors parameter
+if os.path.exists("OIP.webp"):
+    st.sidebar.image("OIP.webp", use_container_width=True)
+else:
+    st.sidebar.title("🏥 HIMSA UCC")
+
 st.sidebar.title("UCC HIM Portal")
 st.sidebar.markdown("### Level 200 - Semester 2")
 
@@ -64,7 +69,7 @@ if app_mode == "📚 Course Material Distribution":
         ]
     )
     
-    st.markdown(f"<div class='course-card'><h3>Current Portal: {course_selection}</h3></div>", unsafe_allowed_html=True)
+    st.markdown(f"<div class='course-card'><h3>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
     
     # 1. HIM 212: PROGRAMMING II
     if "HIM 212" in course_selection:
@@ -133,7 +138,7 @@ if app_mode == "📚 Course Material Distribution":
             ])
             st.dataframe(mock_hits, use_container_width=True)
 
-    # 5. OTHER COURSES (PLACEHOLDERS READY FOR FILES)
+    # 5. OTHER COURSES
     else:
         st.write("#### Course Materials")
         st.warning("🔄 System setup complete. Drop your files for this course into your GitHub folder to activate active client downloads!")
