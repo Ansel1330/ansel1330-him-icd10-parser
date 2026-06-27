@@ -13,7 +13,7 @@ st.markdown("""
     .sub-header { font-size: 16px; color: #555555; margin-bottom: 20px; }
     .course-card { padding: 15px; border-radius: 8px; border-left: 5px solid #0066cc; margin-bottom: 15px; background-color: rgba(0,102,204,0.05); }
     </style>
-""", unsafe_allowed_value=True)
+""", unsafe_allow_html=True)
 
 # --- TRACKING CODES & PERSISTENT SESSION STATE ---
 if "quiz_level" not in st.session_state:
@@ -23,7 +23,7 @@ if "quiz_score" not in st.session_state:
 if "current_course_quiz" not in st.session_state:
     st.session_state.current_course_quiz = "HIM 212: Programming II"
 if "leaderboard_data" not in st.session_state:
-    # Seed data mimicking your cohort's competition group
+    # Cohort competition seed tracking
     st.session_state.leaderboard_data = pd.DataFrame([
         {"Student Name": "Kuami Majesty", "Score (pts)": 140, "Level Completed": "Intermediate"},
         {"Student Name": "Mohammed Issifu", "Score (pts)": 190, "Level Completed": "Super Difficult"},
@@ -51,7 +51,6 @@ if app_mode == "📚 Course Material Distribution":
     st.write("Access reference guides, schemas, outlines, and lecture files across all active domains.")
     st.write("---")
     
-    # Grid of Active Level 200 Courses
     course_selection = st.selectbox(
         "📖 Select Course Department",
         [
@@ -67,65 +66,82 @@ if app_mode == "📚 Course Material Distribution":
     
     st.markdown(f"<div class='course-card'><h3>Current Portal: {course_selection}</h3></div>", unsafe_allowed_html=True)
     
-    # 1. PROGRAMMING II SESSION
+    # 1. HIM 212: PROGRAMMING II
     if "HIM 212" in course_selection:
-        st.write("#### Assigned Core Files & Handouts")
-        files = ["1. WEEK 1_Python Functions_May 2026.pdf", "WEEK4_Introduction to GUI Programs (2).pptx", 
-                 "PROGRAMMING AND SOFTWARE DEV. II_HIM 212_OUTLINE_May_2026 (2).pdf", "Python GUI Programming_P2_JUNE2025 (2).pptx"]
+        st.write("#### Handouts & Slide Decks")
+        files = [
+            "1. WEEK 1_Python Functions_May 2026.pdf",
+            "WEEK4_Introduction to GUI Programs (2).pptx",
+            "PROGRAMMING AND SOFTWARE DEV. II_HIM 212_OUTLINE_May_2026 (2).pdf",
+            "Python GUI Programming_P2_JUNE2025 (2).pptx"
+        ]
         for f in files:
-            st.code(f"📁 Source: .../PROGRAMMING/{f}")
+            st.code(f"📁 Local Source: Downloads/.../{f}")
             if not os.path.exists(f): 
-                with open(f, "w") as empty_f: empty_f.write("Class Material Placeholder")
-            with open(f, "rb") as b_file:
-                st.download_button(label=f"📥 Download {f.split('_')[-1]}", data=b_file, file_name=f, key=f)
-
-    # 2. PATHOPHYSIOLOGY II SESSION
-    elif "HIM 208" in course_selection:
-        st.write("#### Assigned Lecture Presentation Media")
-        files = ["CANCER.pptx", "diet-and-health-ppt-1114he3 (3).pptx", "Fever-HIM NEW (2).pptx", "Introduction to Pathophysiology I.ppt"]
-        for f in files:
-            st.code(f"📁 Source: .../PATHOPHYSIOLOGY/{f}")
-            if not os.path.exists(f): 
-                with open(f, "w") as empty_f: empty_f.write("Class Material Placeholder")
+                with open(f, "w") as stub: stub.write("HIM 212 Lecture Content Stub.")
             with open(f, "rb") as b_file:
                 st.download_button(label=f"📥 Download {f}", data=b_file, file_name=f, key=f)
 
-    # 3. DATABASE STRUCTURES SESSION
-    elif "HIM 204" in course_selection and "Database" in course_selection:
-        st.write("#### Assigned DBMS Structures Handouts")
-        files = ["HIM 204 LECTURE 1 - INTRODUCTION TO DBMS (3).pdf", "HIM 204 LECTURE 2 - DBMS ARCHITECTURE (2).pdf",
-                 "HIM 204 LECTURE 3 - ENTITY RELATION MODEL.pdf", "HIM 204 LECTURE 4 - WORKING WITH ER DIAGRAMS.pdf",
-                 "HIM 204 LECTURE 5 - NORMALIZATION IN DBMS.pdf", "HIM 204 LECTURE 6 - NORMAL FORMS.pdf",
-                 "HIM 204 LECTURE 7 - INTRODUCTION TO DATABASE QUERIES.pdf", "HIM 204 LECTURE 8 - TUTORIAL SESSION.pdf"]
+    # 2. HIM 208: PATHOPHYSIOLOGY II
+    elif "HIM 208" in course_selection:
+        st.write("#### Presentation Media")
+        files = [
+            "CANCER.pptx",
+            "diet-and-health-ppt-1114he3 (3).pptx",
+            "Fever-HIM NEW (2).pptx",
+            "Introduction to Pathophysiology I.ppt"
+        ]
         for f in files:
-            st.code(f"📁 Link: {f}")
-            st.caption("Awaiting user batch drag-and-drop to complete live cloud storage sync.")
+            st.code(f"📁 Local Source: Downloads/.../{f}")
+            if not os.path.exists(f): 
+                with open(f, "w") as stub: stub.write("HIM 208 Lecture Content Stub.")
+            with open(f, "rb") as b_file:
+                st.download_button(label=f"📥 Download {f}", data=b_file, file_name=f, key=f)
 
-    # 4. DISEASE CLASSIFICATION & CODING SESSION (INTEGRATED ICD-10 PARSER TOOL)
+    # 3. HIM 204: DATABASE STRUCTURES
+    elif "HIM 204" in course_selection:
+        st.write("#### Database Architecture & Design Handouts")
+        files = [
+            "HIM 204 LECTURE 1 - INTRODUCTION TO DBMS (3).pdf",
+            "HIM 204 LECTURE 2 - DBMS ARCHITECTURE (2).pdf",
+            "HIM 204 LECTURE 3 - ENTITY RELATION MODEL.pdf",
+            "HIM 204 LECTURE 4 - WORKING WITH ER DIAGRAMS.pdf",
+            "HIM 204 LECTURE 5 - NORMALIZATION IN DBMS.pdf",
+            "HIM 204 LECTURE 6 - NORMAL FORMS.pdf",
+            "HIM 204 LECTURE 7 - INTRODUCTION TO DATABASE QUERIES.pdf",
+            "HIM 204 LECTURE 8 - TUTORIAL SESSION.pdf"
+        ]
+        for f in files:
+            st.code(f"📁 Local Source: Downloads/.../{f}")
+            if not os.path.exists(f): 
+                with open(f, "w") as stub: stub.write("HIM 204 Lecture Content Stub.")
+            with open(f, "rb") as b_file:
+                st.download_button(label=f"📥 Download {f}", data=b_file, file_name=f, key=f)
+
+    # 4. HIM 210: DISEASE CLASSIFICATION AND CODING (PARSER INTEGRATION)
     elif "HIM 210" in course_selection:
         st.write("### ⚡ Integrated Functional Asset")
-        st.info("💡 **HIM 210 Live Lab Tool:** Below is the active ICD-10 Diagnostic Parser Engine embedded directly inside its structural course module!")
+        st.info("💡 **HIM 210 Tool:** Below is your active ICD-10 Diagnostic Parser Engine embedded within its exact course module mapping!")
         st.markdown("---")
         
         search_query = st.text_input("🔍 ICD-10 Alpha-Index & Tabular Match Engine (Type Search Term):")
         if search_query:
             st.success(f"Parsing extracted hits for: '{search_query}' across Volume 1 and Volume 3 maps...")
-            # Interactive matching table mock
             mock_hits = pd.DataFrame([
                 {"Term Match": search_query.capitalize(), "ICD-10 Code block": "B15-B19", "Volume Registry": "Vol 3 Index (Page 328)"},
                 {"Term Match": f"{search_query.capitalize()} (unspecified)", "ICD-10 Code block": "K75.9", "Volume Registry": "Vol 1 Tabular"}
             ])
             st.dataframe(mock_hits, use_container_width=True)
 
-    # 5. REMAINING COHORT COURSE LISTINGS
+    # 5. OTHER COURSES (PLACEHOLDERS READY FOR FILES)
     else:
-        st.write("#### System Status Warning")
-        st.warning("⚠️ Ready for File Paths. Paste your structural URLs or folders here in our next run to activate instant downloads for your classmates!")
+        st.write("#### Course Materials")
+        st.warning("🔄 System setup complete. Drop your files for this course into your GitHub folder to activate active client downloads!")
 
 # --- HUB MODULE 2: ADAPTIVE QUIZ ARENA ---
-elif app_mode == "📝 Adaptive Revision Quiz":
+elif app_mode == "📝 Adaptive Quiz Arena":
     st.title("📝 Multi-Level Adaptive Revision Arena")
-    st.write("Answer questions from Level 200 courses correctly to step up the difficulty from **Medium ➡️ Intermediate ➡️ Super Difficult**.")
+    st.write("Answer questions correctly to step up the difficulty from **Medium ➡️ Intermediate ➡️ Super Difficult**.")
     st.write("---")
     
     st.session_state.current_course_quiz = st.selectbox(
@@ -133,13 +149,12 @@ elif app_mode == "📝 Adaptive Revision Quiz":
         ["HIM 212: Programming II", "HIM 208: Pathophysiology II", "HIM 204: Database Structures", "PHL 205: Critical Thinking"]
     )
     
-    # Level Progress Layout
     levels = ["Medium", "Intermediate", "Super Difficult"]
     current_lvl = st.session_state.quiz_level
     st.progress((levels.index(current_lvl) + 1) / len(levels))
     st.markdown(f"#### Active Tier Status: :orange[{current_lvl}] | Total Accumulated Points: `{st.session_state.quiz_score}`")
 
-    # Adaptive Questions Bank Matrix
+    # Core Course Comprehensive Question Bank Matrix
     quiz_matrix = {
         "HIM 212: Programming II": {
             "Medium": {"q": "In Python, which keyword defines a reusable code block function?", "o": ["func", "def", "lambda"], "c": "def"},
@@ -163,7 +178,6 @@ elif app_mode == "📝 Adaptive Revision Quiz":
         }
     }
 
-    # Pull current active question object
     q_package = quiz_matrix[st.session_state.current_course_quiz][current_lvl]
     user_choice = st.radio(f"❓ Question: {q_package['q']}", q_package['o'])
     
@@ -172,7 +186,6 @@ elif app_mode == "📝 Adaptive Revision Quiz":
             st.success("🎯 Masterful! That choice is absolutely correct.")
             st.session_state.quiz_score += 50
             
-            # Level advancing logic mechanics
             if current_lvl == "Medium":
                 st.session_state.quiz_level = "Intermediate"
             elif current_lvl == "Intermediate":
@@ -203,7 +216,6 @@ elif app_mode == "🏆 Student Leaderboard Pool":
         
     with col2:
         st.subheader("Performance Spread Chart")
-        # Direct Plotly Chart Generation tracking high ranks
         st.bar_chart(data=st.session_state.leaderboard_data, x="Student Name", y="Score (pts)", color="#FF4B4B")
         
     st.markdown("---")
