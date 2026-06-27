@@ -204,52 +204,75 @@ COURSE_CONTEXTS = {
 ALL_COURSES = list(COURSE_CONTEXTS.keys())
 
 
-# --- 6. AI QUESTION GENERATOR ---
+# --- 6. LOCAL CONTENT QUIZ ENGINE ---
+import PyPDF2
+from pptx import Presentation
+
+def extract_text_from_file(filename):
+    text = ""
+    try:
+        if filename.endswith(".pdf"):
+            with open(filename, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+        elif filename.endswith(".pptx") or filename.endswith(".ppt"):
+            prs = Presentation(filename)
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        text += shape.text + "\n"
+    except Exception as e:
+        return f"Error reading {filename}: {e}"
+    return text
+
 def generate_ai_questions(topic: str, num_questions: int = 10) -> list:
-    """Call Claude API to generate real, course-specific exam questions."""
-    client = anthropic.Anthropic()
-    context = COURSE_CONTEXTS.get(topic, "")
-
-    prompt = f"""
-{context}
-
-Generate exactly {num_questions} multiple-choice questions for a semester exam.
-Questions must be academically rigorous, specific to the course syllabus above, and test genuine understanding
-— not surface-level recall. Mix question difficulty: approximately 30% recall, 40% application, 30% analysis.
-
-Return ONLY a valid JSON array. No explanation, no markdown, no code fences. Raw JSON only.
-
-Format:
-[
-  {{
-    "q": "Full question text here?",
-    "o": ["Option A", "Option B", "Option C", "Option D"],
-    "c": "Option A",
-    "explanation": "2-3 sentence explanation of why this is correct and why the others are wrong."
-  }}
-]
-
-Rules:
-- All 4 options must be academically plausible distractors — no obviously absurd options
-- The value of "c" must exactly match one of the strings in "o" character-for-character
-- Each question must address a different topic/concept from the syllabus
-- Explanations must be educational and specific — cite mechanisms, definitions, or rules
-- Do NOT generate generic or vague questions
-"""
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4000,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    raw = message.content[0].text.strip()
-    raw = re.sub(r"^```json\s*", "", raw)
-    raw = re.sub(r"^```\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-    questions = json.loads(raw.strip())
+    """Parses local files for content and generates study prompts for all courses."""
+    
+    # Define your course file registry here
+    course_map = {
+        "HIM 212: Programming and Software Development II": ["1. WEEK 1_Python Functions_May 2026.pdf"],
+        "HIM 208: Pathophysiology II": ["CANCER.pptx", "Fever-HIM NEW (2).pptx"],
+        "HIM 204: Database Structures": ["YOUR_HIM204_FILE.pdf"],
+        "HIM 210: Disease Classification and Coding": ["YOUR_HIM210_FILE.pdf"],
+        "PHL 205: Critical Thinking and Practical Reasoning": ["YOUR_PHL205_FILE.pdf"],
+        "HIM 202: System Analysis and Design": ["YOUR_HIM202_FILE.pdf"],
+        "HIM 206: Data Communication and Networks in Healthcare": ["YOUR_HIM206_FILE.pdf"],
+    }
+    
+    # Get the files associated with the selected topic
+    files = course_map.get(topic, [])
+    full_text = ""
+    
+    for f in files:
+        if os.path.exists(f):
+            full_text += extract_text_from_file(f)
+        else:
+            full_text += f" [File {f} not found in directory] "
+    
+    # Create simple questions from text chunks
+    chunks = [c.strip() for c in full_text.split('.') if len(c) > 30]
+    questions = []
+    
+    # Generate questions based on available text
+    for i in range(min(num_questions, len(chunks))):
+        questions.append({
+            "q": f"Based on your notes: '{chunks[i][:80]}...'",
+            "o": ["True", "False", "Requires further study", "Concept understood"],
+            "c": "True",
+            "explanation": "This content was extracted from your course materials."
+        })
+        
+    # Fallback if no text was found
+    if not questions:
+        questions.append({
+            "q": "No study material found for this course. Please ensure files are in the folder.",
+            "o": ["OK", "Retry", "Check Path", "Upload File"],
+            "c": "OK",
+            "explanation": "The system couldn't find the specific files mapped in the course_map."
+        })
+        
     return questions
-
 
 # ============================================================
 # MODULE 1: COURSE MATERIAL DISTRIBUTION
