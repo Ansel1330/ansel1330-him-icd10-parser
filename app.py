@@ -3,14 +3,14 @@ import pandas as pd
 import numpy as np
 import os
 
-# --- 1. PAGE SETUP ---
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(page_title="UCC HIM Level 200 Hub", page_icon="🎓", layout="wide")
 
-# Persistent light/dark mode switch state
+# Persistent light/dark mode state
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
-# --- 2. SIDEBAR HEADER & NAVIGATION BRANDING ---
+# --- 2. SIDEBAR NAVIGATION PANEL ---
 if os.path.exists("OIP.webp"):
     st.sidebar.image("OIP.webp", use_container_width=True)
 else:
@@ -20,52 +20,52 @@ st.sidebar.markdown("<h2 style='font-size:22px; font-weight:600; margin-top:5px;
 st.sidebar.markdown("<p style='color:#64748B; font-size:14px; margin-top:-15px;'>Level 200 - Semester 2</p>", unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
-# Replaced the double right arrow here with a super clear visual navigation instruction label
+# Replaced completely with your exact text: NAVIGATION PANEL
+st.sidebar.markdown("<h3 style='font-size:16px; font-weight:700; letter-spacing:0.5px; color:#FF4B4B; margin-bottom:5px;'>📋 NAVIGATION PANEL</h3>", unsafe_allow_html=True)
+
 app_mode = st.sidebar.radio(
-    "🧭 Select App Section Below:",
+    "Choose a session to navigate:",
     ["📚 Course Material Distribution", "📝 Adaptive Quiz Arena", "🏆 Student Leaderboard Pool"]
 )
 
 st.sidebar.markdown("---")
 st.session_state.dark_mode = st.sidebar.toggle("🌙 Enable Dark Mode Layout")
 
-# --- 3. DYNAMIC CONTRAST COLOR ENGINE ---
+# --- 3. TYPOGRAPHY & THEME STYLE INJECTION ---
 if st.session_state.dark_mode:
     bg_color = "#0F172A"       # Dark Slate
-    text_color = "#F8FAFC"     # Ghost White
-    card_bg = "#1E293B"        # Lighter Slate Card
+    card_bg = "#1E293B"        # Lighter Card Slate
     border_color = "#334155"   # Dark Border
-    st_text_override = "#F8FAFC !important" # Forces global native text elements to stay white
+    heading_color = "#F8FAFC"  # White Text
+    text_color = "#E2E8F0"     # Light Silver Text
 else:
     bg_color = "#FFFFFF"       # Pure White
-    text_color = "#0F172A"     # Deep Charcoal
-    card_bg = "#F8FAFC"        # Very Light Gray Card
-    border_color = "#E2E8F0"   # Light Gray Border
-    st_text_override = "#0F172A !important" # Forces global native text elements to stay dark gray/black
+    card_bg = "#F8FAFC"        # Light Gray Card
+    border_color = "#E2E8F0"   # Light Border
+    heading_color = "#0F172A"  # Dark Charcoal Text
+    text_color = "#334155"     # Dark Gray Body Text
 
-# Force-inject styling rules onto every layer to fix the invisible text problem completely
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    html, body, [class*="st-"], p, div, label, span, h1, h2, h3, h4, h5, h6 {{
-        font-family: 'Inter', sans-serif !important;
-        color: {st_text_override};
-    }}
+    /* Apply clean font styling to the app background container */
     .stApp {{
         background-color: {bg_color};
-        color: {text_color};
+        font-family: 'Inter', sans-serif;
     }}
+    
+    /* Custom layout headers & text wrappers */
     .main-title {{ 
         font-size: 34px; 
         font-weight: 700; 
-        color: #FF4B4B !important; 
+        color: #FF4B4B; 
         letter-spacing: -0.5px;
         margin-bottom: 5px;
     }}
     .section-subtitle {{
         font-size: 16px;
-        color: #64748B !important;
+        color: #64748B;
         margin-bottom: 25px;
     }}
     .course-card {{ 
@@ -84,16 +84,11 @@ st.markdown(f"""
         border-radius: 16px;
         margin-bottom: 25px;
     }}
-    /* Standardize native Streamlit inputs to respect theme changes */
-    .stTextInput>div>div>input, .stSelectbox>div>div>div, .stNumberInput>div>div>input {{
-        color: {text_color} !important;
-        background-color: {card_bg} !important;
-    }}
     </style>
 """, unsafe_allow_html=True)
 
 
-# --- 4. PERSISTENT SYSTEM STATE TRACKING ---
+# --- 4. SYSTEM SESSION HOOKS ---
 if "quiz_level" not in st.session_state:
     st.session_state.quiz_level = "Medium"
 if "quiz_score" not in st.session_state:
@@ -106,7 +101,7 @@ if "competition_pool" not in st.session_state:
     st.session_state.competition_pool = {}
 
 
-# --- 5. HUB MODULE 1: COURSE MATERIAL DISTRIBUTION ---
+# --- 5. MODULE 1: COURSE MATERIAL DISTRIBUTION ---
 if app_mode == "📚 Course Material Distribution":
     st.markdown("<h1 class='main-title'>📚 Courseware Repository</h1>", unsafe_allow_html=True)
     st.markdown("<p class='section-subtitle'>Access core reference sheets, lecture slide decks, and module mappings.</p>", unsafe_allow_html=True)
@@ -125,11 +120,11 @@ if app_mode == "📚 Course Material Distribution":
         ]
     )
     
-    st.markdown(f"<div class='course-card'><h3 style='margin:0; font-weight:600; color:{text_color};'>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='course-card'><h3 style='margin:0; font-weight:600; color:{heading_color};'>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
     
     # 1. HIM 212: PROGRAMMING II
     if "HIM 212" in course_selection:
-        st.write("#### Handouts & Slide Decks")
+        st.markdown(f"<h4 style='color:{heading_color}; font-weight:600;'>Handouts & Slide Decks</h4>", unsafe_allow_html=True)
         files = [
             "1. WEEK 1_Python Functions_May 2026.pdf",
             "WEEK4_Introduction to GUI Programs (2).pptx",
@@ -145,7 +140,7 @@ if app_mode == "📚 Course Material Distribution":
 
     # 2. HIM 208: PATHOPHYSIOLOGY II
     elif "HIM 208" in course_selection:
-        st.write("#### Presentation Media")
+        st.markdown(f"<h4 style='color:{heading_color}; font-weight:600;'>Presentation Media</h4>", unsafe_allow_html=True)
         files = [
             "CANCER.pptx",
             "diet-and-health-ppt-1114he3 (3).pptx",
@@ -161,7 +156,7 @@ if app_mode == "📚 Course Material Distribution":
 
     # 3. HIM 204: DATABASE STRUCTURES
     elif "HIM 204" in course_selection:
-        st.write("#### Database Architecture & Design Handouts")
+        st.markdown(f"<h4 style='color:{heading_color}; font-weight:600;'>Database Architecture Handouts</h4>", unsafe_allow_html=True)
         files = [
             "HIM 204 LECTURE 1 - INTRODUCTION TO DBMS (3).pdf",
             "HIM 204 LECTURE 2 - DBMS ARCHITECTURE (2).pdf",
@@ -181,7 +176,7 @@ if app_mode == "📚 Course Material Distribution":
 
     # 4. HIM 210: DISEASE CLASSIFICATION AND CODING
     elif "HIM 210" in course_selection:
-        st.write("### ⚡ Integrated Functional Asset")
+        st.markdown(f"<h3 style='color:{heading_color}; font-weight:600;'>⚡ Integrated Functional Asset</h3>", unsafe_allow_html=True)
         st.info("💡 Below is your active ICD-10 Diagnostic Parser Engine embedded within its exact course module mapping!")
         st.markdown("---")
         
@@ -195,11 +190,11 @@ if app_mode == "📚 Course Material Distribution":
             st.dataframe(mock_hits, use_container_width=True)
 
     else:
-        st.write("#### Course Materials")
+        st.markdown(f"<h4 style='color:{heading_color}; font-weight:600;'>Course Materials</h4>", unsafe_allow_html=True)
         st.warning("🔄 System setup complete. Drop your remaining folder assets into the repository to activate download buttons!")
 
 
-# --- 6. HUB MODULE 2: ADAPTIVE QUIZ ARENA ---
+# --- 6. MODULE 2: ADAPTIVE QUIZ ARENA ---
 elif app_mode == "📝 Adaptive Quiz Arena":
     st.markdown("<h1 class='main-title'>📝 Multi-Level Adaptive Revision Arena</h1>", unsafe_allow_html=True)
     st.markdown("<p class='section-subtitle'>Answer questions correctly to step up the difficulty from Medium ➡️ Intermediate ➡️ Super Difficult.</p>", unsafe_allow_html=True)
@@ -218,9 +213,9 @@ elif app_mode == "📝 Adaptive Quiz Arena":
         levels = ["Medium", "Intermediate", "Super Difficult"]
         current_lvl = st.session_state.quiz_level
         st.progress((levels.index(current_lvl) + 1) / len(levels))
-        st.markdown(f"#### Active Question Tier: :orange[{current_lvl}]")
+        
+        st.markdown(f"<h4 style='color:{heading_color}; font-weight:600;'>Active Question Tier: <span style='color:#FF4B4B;'>{current_lvl}</span></h4>", unsafe_allow_html=True)
 
-        # Question Matrix
         quiz_matrix = {
             "HIM 212: Programming II": {
                 "Medium": {"q": "In Python, which keyword defines a reusable code block function?", "o": ["func", "def", "lambda"], "c": "def"},
@@ -276,7 +271,7 @@ elif app_mode == "📝 Adaptive Quiz Arena":
             st.rerun()
 
 
-# --- 7. HUB MODULE 3: LEADERBOARD RANKING POOL ---
+# --- 7. MODULE 3: LEADERBOARD RANKING POOL ---
 elif app_mode == "🏆 Student Leaderboard Pool":
     st.markdown("<h1 class='main-title'>🏆 Live Roster Competition Pool</h1>", unsafe_allow_html=True)
     st.markdown("<p class='section-subtitle'>Real-time ranking of real students who log onto the hub and decide to participate.</p>", unsafe_allow_html=True)
@@ -285,8 +280,8 @@ elif app_mode == "🏆 Student Leaderboard Pool":
     # PROFILE ENTRY PANEL
     st.markdown("""
         <div class='pool-banner'>
-            <h3 style='margin:0 0 5px 0; font-weight:600; color:white !important;'>📝 Active Profile Entrance</h3>
-            <p style='margin:0; opacity:0.9; font-size:14px; color:white !important;'>Enter your real name or unique campus alias to open an active tracking scorecard stream!</p>
+            <h3 style='margin:0 0 5px 0; font-weight:600; color:#FFFFFF;'>📝 Active Profile Entrance</h3>
+            <p style='margin:0; opacity:0.9; font-size:14px; color:#FFFFFF;'>Enter your real name or unique campus alias to open an active tracking scorecard stream!</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -327,11 +322,11 @@ elif app_mode == "🏆 Student Leaderboard Pool":
         col_board, col_chart = st.columns([1, 1])
         
         with col_board:
-            st.markdown(f"### 📊 Active Standing Board")
+            st.markdown(f"<h3 style='color:{heading_color}; font-weight:600;'>📊 Active Standing Board</h3>", unsafe_allow_html=True)
             st.dataframe(df_pool, use_container_width=True)
             
         with col_chart:
-            st.markdown(f"### 📈 Class Ranking Visual Spread")
+            st.markdown(f"<h3 style='color:{heading_color}; font-weight:600;'>📈 Class Ranking Visual Spread</h3>", unsafe_allow_html=True)
             st.bar_chart(data=df_pool, x="Student Name", y="Score (pts)", color="#FF4B4B")
             
         st.sidebar.info(f"🔥 Active Competitors in Pool: {len(pool_records)}")
