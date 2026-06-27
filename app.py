@@ -22,18 +22,20 @@ st.sidebar.markdown("---")
 
 # Navigation controls
 app_mode = st.sidebar.radio(
-    " Reisve Domain Controls",
+    "🧭 Navigation Hub",
     ["📚 Course Material Distribution", "📝 Adaptive Quiz Arena", "🏆 Student Leaderboard Pool"]
 )
 
 st.sidebar.markdown("---")
 st.session_state.dark_mode = st.sidebar.toggle("🌙 Enable Dark Mode Layout")
 
-# Inject Custom Inter Typography & UI Theme Matrices dynamically
+# Inject Custom Inter Typography & Dynamic UI High-Contrast Theme Colors
 if st.session_state.dark_mode:
     bg_color, text_color, card_bg, border_color = "#0F172A", "#F8FAFC", "#1E293B", "#334155"
+    custom_text_color = "#F8FAFC"
 else:
     bg_color, text_color, card_bg, border_color = "#FFFFFF", "#0F172A", "#F8FAFC", "#E2E8F0"
+    custom_text_color = "#0F172A"
 
 st.markdown(f"""
     <style>
@@ -47,6 +49,7 @@ st.markdown(f"""
         color: {text_color};
     }}
     .main-title {{ 
+        font-family: 'Inter', sans-serif !important;
         font-size: 34px; 
         font-weight: 700; 
         color: #FF4B4B; 
@@ -54,6 +57,7 @@ st.markdown(f"""
         margin-bottom: 5px;
     }}
     .section-subtitle {{
+        font-family: 'Inter', sans-serif !important;
         font-size: 16px;
         color: #64748B;
         margin-bottom: 25px;
@@ -89,7 +93,7 @@ if "current_course_quiz" not in st.session_state:
 if "active_student" not in st.session_state:
     st.session_state.active_student = None
 
-# Pure Dynamic Database representation tracker (No fake filling)
+# Dynamic Database representation tracker (No fake filling)
 if "competition_pool" not in st.session_state:
     st.session_state.competition_pool = {}
 
@@ -113,7 +117,7 @@ if app_mode == "📚 Course Material Distribution":
         ]
     )
     
-    st.markdown(f"<div class='course-card'><h3 style='margin:0; font-weight:600;'>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='course-card'><h3 style='margin:0; font-weight:600; color:{custom_text_color};'>Current Portal: {course_selection}</h3></div>", unsafe_allow_html=True)
     
     # 1. HIM 212: PROGRAMMING II
     if "HIM 212" in course_selection:
@@ -227,7 +231,7 @@ elif app_mode == "📝 Adaptive Quiz Arena":
                 "Super Difficult": {"q": "Which design concept describes an atomic, logical execution block that fully commits or entirely rolls back to preserve stability?", "o": ["Entity Relation Cardinality", "ACID Transaction", "Multi-valued dependency splitting"], "c": "ACID Transaction"}
             },
             "PHL 205: Critical Thinking": {
-                "Medium": {"q": "Which error type describes an attack targeted straight at an opponent's character rather than structural arguments?", "o": ["Ad Hominem", "Straw Man Fallacy", "Slippery Slope"], "c": "Ad Hominem"},
+                "Medium": {"q": "Which error type describes an attack targeted straight on an opponent's character rather than structural arguments?", "o": ["Ad Hominem", "Straw Man Fallacy", "Slippery Slope"], "c": "Ad Hominem"},
                 "Intermediate": {"q": "What type of reasoning draws logically certain conclusions from general premises?", "o": ["Deductive reasoning", "Inductive inference", "Abductive assumption"], "c": "Deductive reasoning"},
                 "Super Difficult": {"q": "Which condition is met when a premise's truth absolute forces a true conclusion, yet its premises remain false?", "o": ["Soundness criteria met", "Valid structure only", "Cognitive structural fallacy"], "c": "Valid structure only"}
             }
@@ -276,7 +280,7 @@ elif app_mode == "🏆 Student Leaderboard Pool":
     st.markdown("""
         <div class='pool-banner'>
             <h3 style='margin:0 0 5px 0; font-weight:600; color:white;'>📝 Active Profile Entrance</h3>
-            <p style='margin:0; opacity:0.9; font-size:14px;'>Enter your real name or unique campus alias to open an active tracking scorecard stream!</p>
+            <p style='margin:0; opacity:0.9; font-size:14px; color:white;'>Enter your real name or unique campus alias to open an active tracking scorecard stream!</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -318,11 +322,11 @@ elif app_mode == "🏆 Student Leaderboard Pool":
         col_board, col_chart = st.columns([1, 1])
         
         with col_board:
-            st.markdown("### 📊 Active Standing Board")
+            st.markdown(f"### <span style='color:{custom_text_color};'>📊 Active Standing Board</span>", unsafe_allow_html=True)
             st.dataframe(df_pool, use_container_width=True)
             
         with col_chart:
-            st.markdown("### 📈 Class Ranking Visual Spread")
+            st.markdown(f"### <span style='color:{custom_text_color};'>📈 Class Ranking Visual Spread</span>", unsafe_allow_html=True)
             st.bar_chart(data=df_pool, x="Student Name", y="Score (pts)", color="#FF4B4B")
             
         st.sidebar.info(f"🔥 Active Competitors in Pool: {len(pool_records)}")
