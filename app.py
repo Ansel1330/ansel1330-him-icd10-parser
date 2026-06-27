@@ -207,6 +207,8 @@ ALL_COURSES = list(COURSE_CONTEXTS.keys())
 # --- 6. LOCAL CONTENT QUIZ ENGINE ---
 import PyPDF2
 from pptx import Presentation
+import os
+import re
 
 def extract_text_from_file(filename):
     text = ""
@@ -215,7 +217,8 @@ def extract_text_from_file(filename):
             with open(filename, "rb") as f:
                 reader = PyPDF2.PdfReader(f)
                 for page in reader.pages:
-                    text += page.extract_text() + "\n"
+                    content = page.extract_text()
+                    if content: text += content + "\n"
         elif filename.endswith(".pptx") or filename.endswith(".ppt"):
             prs = Presentation(filename)
             for slide in prs.slides:
@@ -223,54 +226,44 @@ def extract_text_from_file(filename):
                     if hasattr(shape, "text"):
                         text += shape.text + "\n"
     except Exception as e:
-        return f"Error reading {filename}: {e}"
+        return f"Error reading {filename}: {str(e)}"
     return text
 
 def generate_ai_questions(topic: str, num_questions: int = 10) -> list:
-    """Parses local files for content and generates study prompts for all courses."""
-    
-    # Define your course file registry here
+    """Parses local files and generates multiple questions per course."""
     course_map = {
         "HIM 212: Programming and Software Development II": ["1. WEEK 1_Python Functions_May 2026.pdf"],
         "HIM 208: Pathophysiology II": ["CANCER.pptx", "Fever-HIM NEW (2).pptx"],
-        "HIM 204: Database Structures": ["YOUR_HIM204_FILE.pdf"],
-        "HIM 210: Disease Classification and Coding": ["YOUR_HIM210_FILE.pdf"],
-        "PHL 205: Critical Thinking and Practical Reasoning": ["YOUR_PHL205_FILE.pdf"],
-        "HIM 202: System Analysis and Design": ["YOUR_HIM202_FILE.pdf"],
-        "HIM 206: Data Communication and Networks in Healthcare": ["YOUR_HIM206_FILE.pdf"],
+        "HIM 204: Database Structures": ["HIM 204 LECTURE 1 - INTRODUCTION TO DBMS (3).pdf"],
+        "HIM 210: Disease Classification and Coding": ["ICD-10_Volume_1.pdf"],
+        "PHL 205: Critical Thinking and Practical Reasoning": ["PHL205_Notes.pdf"],
+        "HIM 202: System Analysis and Design": ["HIM202_Notes.pdf"],
+        "HIM 206: Data Communication and Networks in Healthcare": ["HIM206_Notes.pdf"],
     }
     
-    # Get the files associated with the selected topic
     files = course_map.get(topic, [])
     full_text = ""
-    
     for f in files:
         if os.path.exists(f):
             full_text += extract_text_from_file(f)
-        else:
-            full_text += f" [File {f} not found in directory] "
     
-    # Create simple questions from text chunks
-    chunks = [c.strip() for c in full_text.split('.') if len(c) > 30]
+    # Split by newlines (regex \n+) to get more granular chunks
+    raw_chunks = [c.strip() for c in re.split(r'\n+', full_text) if len(c.strip()) > 30]
+    
     questions = []
-    
-    # Generate questions based on available text
-    for i in range(min(num_questions, len(chunks))):
+    # Generate questions based on existing chunks
+    for i in range(min(num_questions, len(raw_chunks))):
         questions.append({
-            "q": f"Based on your notes: '{chunks[i][:80]}...'",
-            "o": ["True", "False", "Requires further study", "Concept understood"],
+            "q": f"Q{i+1}: Based on your course notes, analyze: '{raw_chunks[i][:60]}...'",
+            "o": ["True", "False", "Need to Review", "Concept Understood"],
             "c": "True",
-            "explanation": "This content was extracted from your course materials."
+            "explanation": "Extracted from your lecture files."
         })
-        
-    # Fallback if no text was found
+    
+    # Fallback if no questions are generated
     if not questions:
-        questions.append({
-            "q": "No study material found for this course. Please ensure files are in the folder.",
-            "o": ["OK", "Retry", "Check Path", "Upload File"],
-            "c": "OK",
-            "explanation": "The system couldn't find the specific files mapped in the course_map."
-        })
+        return [{"q": "No content found. Please ensure your PDF/PPTX files are in the main folder and named exactly as they appear in the course_map.", 
+                 "o": ["OK"], "c": "OK", "explanation": "File check failed or files are empty."}]
         
     return questions
 
